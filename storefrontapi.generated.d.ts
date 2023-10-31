@@ -131,6 +131,10 @@ export type FeaturedCollectionsQuery = {
 
 export type CollectionDetailsQueryVariables = StorefrontAPI.Exact<{
   handle: StorefrontAPI.Scalars['String'];
+  first?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']>;
+  last?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['Int']>;
+  startCursor?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['String']>;
+  endCursor?: StorefrontAPI.InputMaybe<StorefrontAPI.Scalars['String']>;
 }>;
 
 export type CollectionDetailsQuery = {
@@ -161,6 +165,71 @@ export type CollectionDetailsQuery = {
                 }
               >;
             };
+          }
+        >;
+        pageInfo: Pick<
+          StorefrontAPI.PageInfo,
+          'hasPreviousPage' | 'hasNextPage' | 'startCursor' | 'endCursor'
+        >;
+      };
+    }
+  >;
+};
+
+export type ProductQueryVariables = StorefrontAPI.Exact<{
+  handle: StorefrontAPI.Scalars['String'];
+  selectedOptions:
+    | Array<StorefrontAPI.SelectedOptionInput>
+    | StorefrontAPI.SelectedOptionInput;
+}>;
+
+export type ProductQuery = {
+  product?: StorefrontAPI.Maybe<
+    Pick<
+      StorefrontAPI.Product,
+      'id' | 'title' | 'handle' | 'vendor' | 'description' | 'descriptionHtml'
+    > & {
+      featuredImage?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+      >;
+      options: Array<Pick<StorefrontAPI.ProductOption, 'name' | 'values'>>;
+      selectedVariant?: StorefrontAPI.Maybe<
+        Pick<
+          StorefrontAPI.ProductVariant,
+          'id' | 'availableForSale' | 'sku' | 'title'
+        > & {
+          selectedOptions: Array<
+            Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+          >;
+          image?: StorefrontAPI.Maybe<
+            Pick<
+              StorefrontAPI.Image,
+              'id' | 'url' | 'altText' | 'width' | 'height'
+            >
+          >;
+          price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+          compareAtPrice?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+          >;
+          unitPrice?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+          >;
+          product: Pick<StorefrontAPI.Product, 'title' | 'handle'>;
+        }
+      >;
+      variants: {
+        nodes: Array<
+          Pick<
+            StorefrontAPI.ProductVariant,
+            'id' | 'title' | 'availableForSale'
+          > & {
+            price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+            compareAtPrice?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+            >;
+            selectedOptions: Array<
+              Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+            >;
           }
         >;
       };
@@ -283,9 +352,13 @@ interface GeneratedQueryTypes {
     return: FeaturedCollectionsQuery;
     variables: FeaturedCollectionsQueryVariables;
   };
-  '#graphql\n  query CollectionDetails($handle: String!) {\n    collection(handle: $handle) {\n      id\n      title\n      description\n      handle\n      products(first: 4) {\n        nodes {\n          id\n          title\n          publishedAt\n          handle\n          variants(first: 1) {\n            nodes {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n              price {\n                amount\n                currencyCode\n              }\n              compareAtPrice {\n                amount\n                currencyCode\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query CollectionDetails(\n    $handle: String!,\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String) {\n    collection(handle: $handle) {\n      id\n      title\n      description\n      handle\n      products(first: $first, last: $last, before: $startCursor, after: $endCursor) {\n        nodes {\n          id\n          title\n          publishedAt\n          handle\n          variants(first: 1) {\n            nodes {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n              price {\n                amount\n                currencyCode\n              }\n              compareAtPrice {\n                amount\n                currencyCode\n              }\n            }\n          }\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          startCursor\n          endCursor\n        }\n      }     \n    }\n  }\n': {
     return: CollectionDetailsQuery;
     variables: CollectionDetailsQueryVariables;
+  };
+  '#graphql\n  query product($handle: String!, $selectedOptions: [SelectedOptionInput!]!) {\n    product(handle: $handle) {\n      id\n      title\n      handle\n      vendor\n      description\n      descriptionHtml\n      featuredImage{\n        id\n        url\n        altText\n        width\n        height\n      }\n      options {\n        name,\n        values\n      }\n      selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {\n        id\n        availableForSale\n        selectedOptions {\n          name\n          value\n        }\n        image {\n          id\n          url\n          altText\n          width\n          height\n        }\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n        sku\n        title\n        unitPrice {\n          amount\n          currencyCode\n        }\n        product {\n          title\n          handle\n        }\n      }\n      variants(first: 1) {\n        nodes {\n          id\n          title\n          availableForSale\n          price {\n            currencyCode\n            amount\n          }\n          compareAtPrice {\n            currencyCode\n            amount\n          }\n          selectedOptions {\n            name\n            value\n          }\n        }\n      }\n    }\n  }\n': {
+    return: ProductQuery;
+    variables: ProductQueryVariables;
   };
 }
 

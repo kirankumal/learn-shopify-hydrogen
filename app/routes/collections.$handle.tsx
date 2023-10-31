@@ -1,15 +1,24 @@
 import {useLoaderData} from '@remix-run/react';
 import {json, type LoaderArgs} from '@shopify/remix-oxygen';
-import type {SeoHandleFunction} from '@shopify/hydrogen';
+import {
+  getPaginationVariables,
+  type SeoHandleFunction,
+} from '@shopify/hydrogen';
+import ProductGrid from '~/components/ProductGrid';
 
 const COLLECTION_QUERY = `#graphql
-  query CollectionDetails($handle: String!) {
+  query CollectionDetails(
+    $handle: String!,
+    $first: Int
+    $last: Int
+    $startCursor: String
+    $endCursor: String) {
     collection(handle: $handle) {
       id
       title
       description
       handle
-      products(first: 4) {
+      products(first: $first, last: $last, before: $startCursor, after: $endCursor) {
         nodes {
           id
           title
@@ -35,7 +44,13 @@ const COLLECTION_QUERY = `#graphql
             }
           }
         }
-      }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          startCursor
+          endCursor
+        }
+      }     
     }
   }
 `;
@@ -48,7 +63,9 @@ export const handle = {
   seo,
 };
 
-export async function loader({params, context}: LoaderArgs) {
+export async function loader({params, context, request}: LoaderArgs) {
+  const paginationVariables = getPaginationVariables(request, {pageBy: 4});
+
   const {handle} = params;
 
   if (!handle) {
@@ -57,6 +74,7 @@ export async function loader({params, context}: LoaderArgs) {
 
   const {collection} = await context.storefront.query(COLLECTION_QUERY, {
     variables: {
+      ...paginationVariables,
       handle,
     },
   });
@@ -70,7 +88,6 @@ export async function loader({params, context}: LoaderArgs) {
 
 export default function Collection() {
   const {collection} = useLoaderData<typeof loader>();
-  console.log('[COLLECTION]', collection);
 
   return (
     <>
@@ -89,6 +106,10 @@ export default function Collection() {
           </div>
         )}
       </header>
+      <ProductGrid
+        collection={collection}
+        url={`/collections/${collection.handle}`}
+      />
     </>
   );
 }
